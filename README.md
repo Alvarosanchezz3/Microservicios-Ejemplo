@@ -31,3 +31,4 @@ Este proyecto implementa una arquitectura de microservicios desarrollada en Java
 4. Ejecuta `docker-compose up` en la raíz del proyecto para iniciar todos los microservicios y las bases de datos.
 
 ## Video
+https://github.com/Alvarosanchezz3/Microservicios-Ejemplo/assets/99328696/1f85ef00-27d3-4807-a2db-a458cfafbadc
