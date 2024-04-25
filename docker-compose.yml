@@ -1,0 +1,110 @@
+version: '3.7'
+
+networks:
+  msvc-ejemplo:
+
+services:
+  config-server:
+    image: config-server-ejemplo-img:v1
+    ports:
+      - "8888:8888"
+    container_name: config-server-ejemplo
+    environment:
+      ACCESS_TOKEN: ${ACCESS_TOKEN}
+    networks:
+      - msvc-ejemplo
+  eureka-server:
+    image: eureka-server-ejemplo-img:v1
+    ports:
+      - "8761:8761"
+    container_name: eureka-server-ejemplo
+    networks:
+      - msvc-ejemplo
+  servicio-MySQL:
+    image: mysql
+    container_name: msvc-mysql
+    environment:
+      MYSQL_DATABASE: msvc_ejemplo_users
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    restart: always
+    networks:
+      - msvc-ejemplo
+  servicio-PostgreSQL:
+    image: postgres
+    container_name: msvc-postgresql
+    environment:
+      POSTGRES_DB: msvc_ejemplo_products
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    restart: always
+    networks:
+      - msvc-ejemplo
+  zipkin-server:
+    image: zipkin-img
+    ports:
+      - "9411:9411"
+    container_name: zipkin-server-ejemplo
+    environment:
+      STORAGE_TYPE: mysql
+      MYSQL_HOST: servicio-MySQL
+      MYSQL_USER: root
+      MYSQL_PASS: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_TLS: true
+    restart: always
+    depends_on:
+      - servicio-MySQL
+    networks:
+      - msvc-ejemplo
+  servicio-gateway:
+    image: servicio-gateway-ejemplo-img:v1
+    ports:
+      - "8090:8090"
+    container_name: servicio-gateway-ejemplo
+    depends_on:
+      - config-server
+      - eureka-server
+      - servicio-usuarios
+      - servicio-productos
+      - servicio-items
+      - servicio-auth
+    networks:
+      - msvc-ejemplo
+  servicio-usuarios:
+    image: servicio-usuarios-ejemplo-img:v1
+    container_name: servicio-usuarios-ejemplo
+    depends_on:
+      - config-server
+      - eureka-server
+      - servicio-MySQL
+    networks:
+      - msvc-ejemplo
+  servicio-auth:
+    image: servicio-auth-ejemplo-img:v1
+    ports:
+      - "8007:8007"
+    container_name: servicio-auth-ejemplo
+    depends_on:
+      - config-server
+      - eureka-server
+      - servicio-usuarios
+    networks:
+      - msvc-ejemplo
+  servicio-productos:
+    image: servicio-productos-ejemplo-img:v1
+    container_name: servicio-productos-ejemplo
+    depends_on:
+      - config-server
+      - eureka-server
+      - servicio-PostgreSQL
+    networks:
+      - msvc-ejemplo
+  servicio-items:
+    image: servicio-items-ejemplo-img:v1
+    ports:
+      - "8005:8005"
+    container_name: servicio-items-ejemplo
+    depends_on:
+      - config-server
+      - eureka-server
+      - servicio-productos
+    networks:
+      - msvc-ejemplo
